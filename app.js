@@ -60,9 +60,10 @@ const addEmployee = () => {
       message: 'What is the last name of the Employee?'
     },
     {
-      type: 'input',
-      name: 'description',
-      message: 'Describe the new menu item:'
+      type: 'list',
+      name: 'role',
+      message: 'What is the role of the Employee?'
+      choices: ['Sales', 'Engineering', 'Finance', 'Planning', 'Opration']
     },
     {
       type: 'number',
