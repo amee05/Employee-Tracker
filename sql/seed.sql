@@ -6,7 +6,7 @@ VALUES
     ('Sales'),
     ('Engineering'), 
     ('Finance'),
-    ('Planning')
+    ('Planning'),
     ('Opration');
 
 INSERT INTO role
@@ -19,8 +19,8 @@ VALUES
     ('Account Manager', 100000, 3),
     ('Accountant', 85000, 3),
     ('Planning Manager', 150000, 4),
-    ('Planner', 90000, 4)
-    ('Opration Head', 135000, 5)
+    ('Planner', 90000, 4),
+    ('Opration Head', 135000, 5),
     ('Opration Engineer', 120000, 5);
 
 
@@ -34,6 +34,6 @@ VALUES
     ('Vishal', 'Soni', 5, NULL),
     ('Mary', 'Ryan', 6, 5),
     ('James', 'Lords', 7, NULL),
-    ('Tina', 'Brody', 8, 7)
-    ('Kelly', 'Rodds', 9, Null)
+    ('Tina', 'Brody', 8, 7),
+    ('Kelly', 'Rodds', 9, Null),
     ('Sienna', 'Rice', 10, 9);
