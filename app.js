@@ -16,7 +16,7 @@ const viewAllEmployee = () => {
   LEFT JOIN department ON role.department_id = department.id
   LEFT JOIN employee manager on manager.id = employee.manager_id`, (err, employee) => {
     if (err) { console.log(err) }
-    console.log(employee)
+    console.table(employee)
     main()
   })
 
@@ -29,7 +29,7 @@ const viewByDepartments = () => {
   LEFT JOIN department ON role.department_id = department.id
   LEFT JOIN employee manager on manager.id = employee.manager_id ORDER BY role.department_id ?`, (err, employee) => {
     if (err) { console.log(err) }
-    console.log(employee)
+    console.table(employee)
     main()
   })
 
@@ -41,7 +41,7 @@ const viewByManager = () => {
   LEFT JOIN department ON role.department_id = department.id
   LEFT JOIN employee manager on manager.id = employee.manager_id ORDERBY employee.manager_id ?`, (err, employee) => {
     if (err) { console.log(err) }
-    console.log(employee)
+    console.table(employee)
     main()
   })
 
@@ -62,9 +62,9 @@ const addEmployee = () => {
     {
       type: 'list',
       name: 'role_id',
-      message: 'Pick the role id for this Employee'
-      choices: choices: function() {
-        rolesArray = [];
+      message: 'Pick the role id for this Employee',
+      choices: function() {
+        rolesArray = []
         result.forEach(result => {
           rolesArray.push(
             result.title
@@ -78,13 +78,13 @@ const addEmployee = () => {
     .then((function (data) {
       console.log(data);
       const role = data.roleName;
-      connection.query('SELECT * FROM role', function (err, res) {
+      db.query('SELECT * FROM role', function (err, res) {
         if (err) { console.log(err) }
         let filteredRole = res.filter(function (res) {
           return res.title == role
         })
         let roleId = filteredRole[0].id;
-        connection.query("SELECT * FROM employee", function (err, res) {
+        db.query("SELECT * FROM employee", function (err, res) {
           inquirer
             .prompt([
               {
@@ -101,19 +101,19 @@ const addEmployee = () => {
                   return managersArray;
                 }
               }
-            ]).then(function (managerAnswer) {
-              const manager = managerAnswer.manager;
-              connection.query('SELECT * FROM employee', function (err, res) {
+            ]).then(function (managerdata) {
+              const manager = managerdata.manager;
+              db.query('SELECT * FROM employee', function (err, res) {
                 if (err) throw (err);
                 let filteredManager = res.filter(function (res) {
                   return res.last_name == manager;
                 })
                 let managerId = filteredManager[0].id;
-                console.log(managerAnswer);
+                console.log(managerdata);
                 let query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
                 let values = [data.firstName, data.lastName, roleId, managerId]
                 console.log(values);
-                connection.query(query, values,
+                db.query(query, values,
                   function (err, res, fields) {
                     console.log(`You have added this employee: ${(values[0]).toUpperCase()}.`)
                   })
@@ -122,8 +122,9 @@ const addEmployee = () => {
             })
         })
       })
-    })
-})
+    }))
+  .catch(err => console.log(err))
+}
 
 const addDepartment = () => {
   inquirer.prompt({
@@ -131,10 +132,10 @@ const addDepartment = () => {
     name: 'name',
     message: 'What is the name of the Department?'
   })
-  .then(({data}) => {
-    db.query('INSERT INTO department (name) VALUES ?', {data.name}, err => {
+  .then(name => {
+    db.query('INSERT INTO department SET ?', name, err => {
       if (err) {console.log(err)}
-      console.log('New Department Added :' + {data.name})
+      console.log('New Department Added :' + name)
       main()
     })
   })
@@ -148,12 +149,12 @@ const addRole = () => {
       type: 'input',
       name: 'title',
       message:'What is the role title?'
-    }
+    },
     {
       type: 'input',
       name: 'salary',
       message: 'Enter the salary for this role'
-    }
+    },
     {
       type: 'list',
       name: 'id',
@@ -170,26 +171,26 @@ const addRole = () => {
       }
     ]) 
     
-  }
     .then(function (data) {
       const department = data.departmentName
       db.query('SELECT * FROM DEPARTMENT', function (err, res) {
 
-        if (err) {const.log(err)}
+        if (err) {console.log(err)}
         let filteredDept = res.filter(function (res) {
           return res.name == department;
         }
         )
-        let id = filteredDept[0].id;
-        db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', { data.title }, { parseInt(data.salary)},
-         { id }, err err => {
+        let id = filteredDept[0].id
+        let values = [data.title, parseInt(data.salary), id]
+        db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', values, err => {
         if (err) { console.log(err) }
            console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
-           viewRoles())
+           viewRoles()
         main()
         
       })
     })
+  })
   .catch(err => console.log(err))
 }
 
@@ -249,7 +250,8 @@ const addRole = () => {
 // }
 
 const main = () => {
-  inquirer.prompt({
+  inquirer.prompt(
+    {
     type: 'list',
     name: 'action',
     message: 'What would you like to do?',
@@ -274,11 +276,11 @@ const main = () => {
           addDepartment()
           break
         case 'Add Role':
-          addRole
+          addRole()
           break
-        case 'EXIT':
-          process.exit()
-          break
+        // case 'EXIT':
+        //   process.exit()
+        //   break
       }
     })
     .catch(err => console.log(err))
