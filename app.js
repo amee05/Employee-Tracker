@@ -47,152 +47,152 @@ const viewByManager = () => {
 
 }
 
-const addEmployee = () => {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'first',
-      message: 'What is the first name of the Employee?'
-    },
-    {
-      type: 'input',
-      name: 'last',
-      message: 'What is the last name of the Employee?'
-    },
-    {
-      type: 'list',
-      name: 'role_id',
-      message: 'Pick the role id for this Employee',
-      choices: function() {
-        rolesArray = []
-        result.forEach(result => {
-          rolesArray.push(
-            result.title
-          )
-        })
-        return rolesArray
-      }
-    },
+// const addEmployee = () => {
+//   inquirer.prompt([
+//     {
+//       type: 'input',
+//       name: 'first',
+//       message: 'What is the first name of the Employee?'
+//     },
+//     {
+//       type: 'input',
+//       name: 'last',
+//       message: 'What is the last name of the Employee?'
+//     },
+//     {
+//       type: 'list',
+//       name: 'role_id',
+//       message: 'Pick the role id for this Employee',
+//       choices: function() {
+//         rolesArray = []
+//         result.forEach(result => {
+//           rolesArray.push(
+//             result.title
+//           )
+//         })
+//         return rolesArray
+//       }
+//     },
     
-  ])
-    .then((function (data) {
-      console.log(data);
-      const role = data.roleName;
-      db.query('SELECT * FROM role', function (err, res) {
-        if (err) { console.log(err) }
-        let filteredRole = res.filter(function (res) {
-          return res.title == role
-        })
-        let roleId = filteredRole[0].id;
-        db.query("SELECT * FROM employee", function (err, res) {
-          inquirer
-            .prompt([
-              {
-                name: "manager",
-                type: "list",
-                message: "Who is the Manager?",
-                choices: function () {
-                  managersArray = []
-                  res.forEach(res => {
-                    managersArray.push(
-                      res.last_name)
+//   ])
+//     .then((function (data) {
+//       console.log(data);
+//       const role = data.roleName;
+//       db.query('SELECT * FROM role', function (err, res) {
+//         if (err) { console.log(err) }
+//         let filteredRole = res.filter(function (res) {
+//           return res.title == role
+//         })
+//         let roleId = filteredRole[0].id;
+//         db.query("SELECT * FROM employee", function (err, res) {
+//           inquirer
+//             .prompt([
+//               {
+//                 name: "manager",
+//                 type: "list",
+//                 message: "Who is the Manager?",
+//                 choices: function () {
+//                   managersArray = []
+//                   res.forEach(res => {
+//                     managersArray.push(
+//                       res.last_name)
 
-                  })
-                  return managersArray;
-                }
-              }
-            ]).then(function (managerdata) {
-              const manager = managerdata.manager;
-              db.query('SELECT * FROM employee', function (err, res) {
-                if (err) throw (err);
-                let filteredManager = res.filter(function (res) {
-                  return res.last_name == manager;
-                })
-                let managerId = filteredManager[0].id;
-                console.log(managerdata);
-                let query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
-                let values = [data.firstName, data.lastName, roleId, managerId]
-                console.log(values);
-                db.query(query, values,
-                  function (err, res, fields) {
-                    console.log(`You have added this employee: ${(values[0]).toUpperCase()}.`)
-                  })
-                viewEmployees();
-              })
-            })
-        })
-      })
-    }))
-  .catch(err => console.log(err))
-}
+//                   })
+//                   return managersArray;
+//                 }
+//               }
+//             ]).then(function (managerdata) {
+//               const manager = managerdata.manager;
+//               db.query('SELECT * FROM employee', function (err, res) {
+//                 if (err) throw (err);
+//                 let filteredManager = res.filter(function (res) {
+//                   return res.last_name == manager;
+//                 })
+//                 let managerId = filteredManager[0].id;
+//                 console.log(managerdata);
+//                 let query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+//                 let values = [data.firstName, data.lastName, roleId, managerId]
+//                 console.log(values);
+//                 db.query(query, values,
+//                   function (err, res, fields) {
+//                     console.log(`You have added this employee: ${(values[0]).toUpperCase()}.`)
+//                   })
+//                 viewEmployees();
+//               })
+//             })
+//         })
+//       })
+//     }))
+//   .catch(err => console.log(err))
+// }
 
-const addDepartment = () => {
-  inquirer.prompt({
-    type: 'input',
-    name: 'name',
-    message: 'What is the name of the Department?'
-  })
-  .then(name => {
-    db.query('INSERT INTO department SET ?', name, err => {
-      if (err) {console.log(err)}
-      console.log('New Department Added :' + name)
-      main()
-    })
-  })
-  .catch(err => console.log(err))
-}
+// const addDepartment = () => {
+//   inquirer.prompt({
+//     type: 'input',
+//     name: 'name',
+//     message: 'What is the name of the Department?'
+//   })
+//   .then(name => {
+//     db.query('INSERT INTO department SET ?', name, err => {
+//       if (err) {console.log(err)}
+//       console.log('New Department Added :' + name)
+//       main()
+//     })
+//   })
+//   .catch(err => console.log(err))
+// }
 
-const addRole = () => {
+// const addRole = () => {
   
-    inquirer.prompt([
-      {
-      type: 'input',
-      name: 'title',
-      message:'What is the role title?'
-    },
-    {
-      type: 'input',
-      name: 'salary',
-      message: 'Enter the salary for this role'
-    },
-    {
-      type: 'list',
-      name: 'id',
-      message: 'Select the Department to add this role',
-        choices: function () {
-          let choicesArray = []
-          res.forEach(res => {
-            choicesArray.push(
-              res.name
-            )
-          })
-          return choicesArray
-        }
-      }
-    ]) 
+//     inquirer.prompt([
+//       {
+//       type: 'input',
+//       name: 'title',
+//       message:'What is the role title?'
+//     },
+//     {
+//       type: 'input',
+//       name: 'salary',
+//       message: 'Enter the salary for this role'
+//     },
+//     {
+//       type: 'list',
+//       name: 'id',
+//       message: 'Select the Department to add this role',
+//         choices: function () {
+//           let choicesArray = []
+//           res.forEach(res => {
+//             choicesArray.push(
+//               res.name
+//             )
+//           })
+//           return choicesArray
+//         }
+//       }
+//     ]) 
     
-    .then(function (data) {
-      const department = data.departmentName
-      db.query('SELECT * FROM DEPARTMENT', function (err, res) {
+//     .then(function (data) {
+//       const department = data.departmentName
+//       db.query('SELECT * FROM DEPARTMENT', function (err, res) {
 
-        if (err) {console.log(err)}
-        let filteredDept = res.filter(function (res) {
-          return res.name == department;
-        }
-        )
-        let id = filteredDept[0].id
-        let values = [data.title, parseInt(data.salary), id]
-        db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', values, err => {
-        if (err) { console.log(err) }
-           console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
-           viewRoles()
-        main()
+//         if (err) {console.log(err)}
+//         let filteredDept = res.filter(function (res) {
+//           return res.name == department;
+//         }
+//         )
+//         let id = filteredDept[0].id
+//         let values = [data.title, parseInt(data.salary), id]
+//         db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', values, err => {
+//         if (err) { console.log(err) }
+//            console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
+//            viewRoles()
+//         main()
         
-      })
-    })
-  })
-  .catch(err => console.log(err))
-}
+//       })
+//     })
+//   })
+//   .catch(err => console.log(err))
+// }
 
 // const deleteItem = () => {
 //   db.query('SELECT * FROM menu', (err, menu) => {
@@ -255,8 +255,9 @@ const main = () => {
     type: 'list',
     name: 'action',
     message: 'What would you like to do?',
-    choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager', 'Add Employee', 
-    'Add Departmet', 'Add Role']
+    choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager']
+    // , 'Add Employee', 
+    // 'Add Departmet', 'Add Role']
   })
     .then(({ action }) => {
       switch (action) {
@@ -269,15 +270,15 @@ const main = () => {
         case 'View All Employees by Manager':
           viewByManager()
           break
-        case 'Add Employee':
-          addEmployee()
-          break
-        case 'Add Departmet':
-          addDepartment()
-          break
-        case 'Add Role':
-          addRole()
-          break
+        // case 'Add Employee':
+        //   addEmployee()
+        //   break
+        // case 'Add Departmet':
+        //   addDepartment()
+        //   break
+        // case 'Add Role':
+        //   addRole()
+        //   break
         // case 'EXIT':
         //   process.exit()
         //   break
