@@ -27,7 +27,7 @@ const viewByDepartments = () => {
   SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
   FROM employee LEFT JOIN role ON employee.role_id = role.id
   LEFT JOIN department ON role.department_id = department.id
-  LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?`, {department.name}, (err, employee) => {
+  LEFT JOIN employee manager on manager.id = employee.manager_id ORDER BY role.department_id ?`, (err, employee) => {
     if (err) { console.log(err) }
     console.log(employee)
     main()
@@ -39,7 +39,7 @@ const viewByManager = () => {
   SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
   FROM employee LEFT JOIN role ON employee.role_id = role.id
   LEFT JOIN department ON role.department_id = department.id
-  LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?`, { manager.first_name }, (err, employee) => {
+  LEFT JOIN employee manager on manager.id = employee.manager_id ORDERBY employee.manager_id ?`, (err, employee) => {
     if (err) { console.log(err) }
     console.log(employee)
     main()
@@ -61,86 +61,200 @@ const addEmployee = () => {
     },
     {
       type: 'list',
-      name: 'role',
-      message: 'What is the role of the Employee?'
-      choices: ['Sales', 'Engineering', 'Finance', 'Planning', 'Opration']
+      name: 'role_id',
+      message: 'Pick the role id for this Employee'
+      choices: choices: function() {
+        rolesArray = [];
+        result.forEach(result => {
+          rolesArray.push(
+            result.title
+          )
+        })
+        return rolesArray
+      }
     },
-    {
-      type: 'number',
-      name: 'price',
-      message: 'What is the new menu item price?'
-    }
+    
   ])
-    .then(item => {
-      db.query('INSERT INTO menu SET ?', item, err => {
+    .then((function (data) {
+      console.log(data);
+      const role = data.roleName;
+      connection.query('SELECT * FROM role', function (err, res) {
         if (err) { console.log(err) }
-        console.log('New Menu Item Added!')
-        main()
-      })
-    })
-}
+        let filteredRole = res.filter(function (res) {
+          return res.title == role
+        })
+        let roleId = filteredRole[0].id;
+        connection.query("SELECT * FROM employee", function (err, res) {
+          inquirer
+            .prompt([
+              {
+                name: "manager",
+                type: "list",
+                message: "Who is the Manager?",
+                choices: function () {
+                  managersArray = []
+                  res.forEach(res => {
+                    managersArray.push(
+                      res.last_name)
 
-const deleteItem = () => {
-  db.query('SELECT * FROM menu', (err, menu) => {
-    if (err) { console.log(err) }
-
-    inquirer.prompt({
-      type: 'list',
-      name: 'id',
-      message: 'Select the menu item you want to delete:',
-      choices: menu.map(item => ({
-        name: item.name,
-        value: item.id
-      }))
-    })
-      .then(({ id }) => {
-        db.query('DELETE FROM menu WHERE ?', { id }, err => {
-          if (err) { console.log(err) }
-          console.log('Menu Item Deleted!')
-          main()
+                  })
+                  return managersArray;
+                }
+              }
+            ]).then(function (managerAnswer) {
+              const manager = managerAnswer.manager;
+              connection.query('SELECT * FROM employee', function (err, res) {
+                if (err) throw (err);
+                let filteredManager = res.filter(function (res) {
+                  return res.last_name == manager;
+                })
+                let managerId = filteredManager[0].id;
+                console.log(managerAnswer);
+                let query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+                let values = [data.firstName, data.lastName, roleId, managerId]
+                console.log(values);
+                connection.query(query, values,
+                  function (err, res, fields) {
+                    console.log(`You have added this employee: ${(values[0]).toUpperCase()}.`)
+                  })
+                viewEmployees();
+              })
+            })
         })
       })
-      .catch(err => console.log(err))
+    })
+})
+
+const addDepartment = () => {
+  inquirer.prompt({
+    type: 'input',
+    name: 'name',
+    message: 'What is the name of the Department?'
   })
+  .then(({data}) => {
+    db.query('INSERT INTO department (name) VALUES ?', {data.name}, err => {
+      if (err) {console.log(err)}
+      console.log('New Department Added :' + {data.name})
+      main()
+    })
+  })
+  .catch(err => console.log(err))
 }
 
-const updateItem = () => {
-  db.query('SELECT * FROM menu', (err, menu) => {
-    if (err) { console.log(err) }
-
+const addRole = () => {
+  
     inquirer.prompt([
       {
-        type: 'list',
-        name: 'id',
-        message: 'Select the menu item you want to update the price:',
-        choices: menu.map(item => ({
-          name: `${item.name} (${item.price})`,
-          value: item.id
-        }))
-      },
-      {
-        type: 'number',
-        name: 'price',
-        message: 'Enter the new value for the item price:'
+      type: 'input',
+      name: 'title',
+      message:'What is the role title?'
+    }
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'Enter the salary for this role'
+    }
+    {
+      type: 'list',
+      name: 'id',
+      message: 'Select the Department to add this role',
+        choices: function () {
+          let choicesArray = []
+          res.forEach(res => {
+            choicesArray.push(
+              res.name
+            )
+          })
+          return choicesArray
+        }
       }
-    ])
-      .then(({ id, price }) => {
-        db.query('UPDATE menu SET ? WHERE ?', [{ price }, { id }], err => {
-          if (err) { console.log(err) }
-          console.log('Menu Item Price Updated!')
-          main()
-        })
+    ]) 
+    
+  }
+    .then(function (data) {
+      const department = data.departmentName
+      db.query('SELECT * FROM DEPARTMENT', function (err, res) {
+
+        if (err) {const.log(err)}
+        let filteredDept = res.filter(function (res) {
+          return res.name == department;
+        }
+        )
+        let id = filteredDept[0].id;
+        db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', { data.title }, { parseInt(data.salary)},
+         { id }, err err => {
+        if (err) { console.log(err) }
+           console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
+           viewRoles())
+        main()
+        
       })
-      .catch(err => console.log(err))
-  })
+    })
+  .catch(err => console.log(err))
 }
+
+// const deleteItem = () => {
+//   db.query('SELECT * FROM menu', (err, menu) => {
+//     if (err) { console.log(err) }
+
+//     inquirer.prompt({
+//       type: 'list',
+//       name: 'id',
+//       message: 'Select the menu item you want to delete:',
+//       choices: menu.map(item => ({
+//         name: item.name,
+//         value: item.id
+//       }))
+//     })
+//       .then(({ id }) => {
+//         db.query('DELETE FROM menu WHERE ?', { id }, err => {
+//           if (err) { console.log(err) }
+//           console.log('Menu Item Deleted!')
+//           main()
+//         })
+//       })
+//       .catch(err => console.log(err))
+//   })
+// }
+
+// const updateItem = () => {
+//   db.query('SELECT * FROM menu', (err, menu) => {
+//     if (err) { console.log(err) }
+
+//     inquirer.prompt([
+//       {
+//         type: 'list',
+//         name: 'id',
+//         message: 'Select the menu item you want to update the price:',
+//         choices: menu.map(item => ({
+//           name: `${item.name} (${item.price})`,
+//           value: item.id
+//         }))
+//       },
+//       {
+//         type: 'number',
+//         name: 'price',
+//         message: 'Enter the new value for the item price:'
+//       }
+//     ])
+//       .then(({ id, price }) => {
+//         db.query('UPDATE menu SET ? WHERE ?', [{ price }, { id }], err => {
+//           if (err) { console.log(err) }
+//           console.log('Menu Item Price Updated!')
+//           main()
+//         })
+//       })
+//       .catch(err => console.log(err))
+//   })
+// }
 
 const main = () => {
   inquirer.prompt({
     type: 'list',
     name: 'action',
     message: 'What would you like to do?',
-    choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager', 'Add Employee', 'Remove Employee', 'Update Employee Role', 'Update Employee Manager']
+    choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager', 'Add Employee', 
+    'Add Departmet', 'Add Role']
   })
     .then(({ action }) => {
       switch (action) {
@@ -153,14 +267,14 @@ const main = () => {
         case 'View All Employees by Manager':
           viewByManager()
           break
-        case 'Remove Employee':
-          deleteItem()
+        case 'Add Employee':
+          addEmployee()
           break
-        case 'Update Employee Role':
-          deleteItem()
+        case 'Add Departmet':
+          addDepartment()
           break
-        case 'Update Employee Manager':
-          deleteItem()
+        case 'Add Role':
+          addRole
           break
         case 'EXIT':
           process.exit()

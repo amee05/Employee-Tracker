@@ -1,23 +1,25 @@
 {
-  "name": "05-Express",
+  "name": "Employee-Tracker",
   "version": "1.0.0",
-  "description": "- Join queries\r - Express & MySQL\r - Intro to Handlebars",
-  "main": "server.js",
+  "description": "",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/QFults/05-Express.git"
+    "url": "git+https://github.com/amee05/Employee-Tracker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/QFults/05-Express/issues"
+    "url": "https://github.com/amee05/Employee-Tracker/issues"
   },
-  "homepage": "https://github.com/QFults/05-Express#readme",
+  "homepage": "https://github.com/amee05/Employee-Tracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^7.3.3",
     "mysql2": "^2.2.5"
   }
 }
