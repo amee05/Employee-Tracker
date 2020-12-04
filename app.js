@@ -126,73 +126,64 @@ const viewByManager = () => {
 //   .catch(err => console.log(err))
 // }
 
-// const addDepartment = () => {
-//   inquirer.prompt({
-//     type: 'input',
-//     name: 'name',
-//     message: 'What is the name of the Department?'
-//   })
-//   .then(name => {
-//     db.query('INSERT INTO department SET ?', name, err => {
-//       if (err) {console.log(err)}
-//       console.log('New Department Added :' + name)
-//       mainMenu()
-//     })
-//   })
-//   .catch(err => console.log(err))
-// }
-
-// const addRole = () => {
+const addDept = () => {
   
-//     inquirer.prompt([
-//       {
-//       type: 'input',
-//       name: 'title',
-//       message:'What is the role title?'
-//     },
-//     {
-//       type: 'input',
-//       name: 'salary',
-//       message: 'Enter the salary for this role'
-//     },
-//     {
-//       type: 'list',
-//       name: 'id',
-//       message: 'Select the Department to add this role',
-//         choices: function () {
-//           let choicesArray = []
-//           res.forEach(res => {
-//             choicesArray.push(
-//               res.name
-//             )
-//           })
-//           return choicesArray
-//         }
-//       }
-//     ]) 
-    
-//     .then(function (data) {
-//       const department = data.departmentName
-//       db.query('SELECT * FROM DEPARTMENT', function (err, res) {
+  inquirer.prompt({
+    type: 'input',
+    name: 'name',
+    message: 'What is the name of the New Department?'
+  })
+  .then(data => {
+    db.query('INSERT INTO department SET ?', data, err => {
+      if (err) {console.log(err)}
+      console.log('New Department Added :' + data)
+      mainMenu()
+    })
+  })
+  .catch(err => console.log(err))
+}
 
-//         if (err) {console.log(err)}
-//         let filteredDept = res.filter(function (res) {
-//           return res.name == department;
-//         }
-//         )
-//         let id = filteredDept[0].id
-//         let values = [data.title, parseInt(data.salary), id]
-//         db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', values, err => {
-//         if (err) { console.log(err) }
-//            console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
-//            viewRoles()
-//         mainMenu()
+const addRole = () => {
+  db.query('SELECT * FROM department', (err, department) =>{
+    if (err) { console.log(err) }
+  
+    inquirer.prompt(
+      {
+      type: 'input',
+      name: 'title',
+      message:'What is the role title?'
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: 'Enter the salary for this role'
+    },
+    {
+      type: 'list',
+      name: 'id',
+      message: 'Select the Department to add this role',
+      choices: department.map(dept => ({
+        name: dept.name,
+        value: dept.id
+      }))
+    })
+      .then((answer) => {
+        db.query(
+          `INSERT INTO roles(title, salary, department_id) 
+                VALUES
+                ("${answer.title}", "${answer.salary}", 
+                (SELECT id FROM departments WHERE department_name = "${answer.dept}"));`
+        )
+     
+      
+        mainMenu()
         
-//       })
-//     })
-//   })
-//   .catch(err => console.log(err))
-// }
+      
+    })
+  })
+  .catch(err => console.log(err))
+
+}
 
 // const deleteItem = () => {
 //   db.query('SELECT * FROM menu', (err, menu) => {
@@ -255,9 +246,9 @@ const mainMenu = () => {
     type: 'list',
     name: 'action',
     message: 'What would you like to do?',
-    choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager']
+      choices: ['View All Employees', 'View All Employees by Departmetnt', 'View All Employees by Manager', 'Add Departmet', 'Add Role', 'Exit']
     // , 'Add Employee', 
-    // 'Add Departmet', 'Add Role']
+    //  ]
   })
     .then(({ action }) => {
       switch (action) {
@@ -273,15 +264,15 @@ const mainMenu = () => {
         // case 'Add Employee':
         //   addEmployee()
         //   break
-        // case 'Add Departmet':
-        //   addDepartment()
-        //   break
-        // case 'Add Role':
-        //   addRole()
-        //   break
-        // case 'EXIT':
-        //   process.exit()
-        //   break
+        case 'Add Department':
+          addDept()
+          break
+        case 'Add Role':
+          addRole()
+          break
+        case 'Exit':
+          process.exit()
+          break
       }
     })
     .catch(err => console.log(err))
