@@ -5,7 +5,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '#eemaMi05',
-  database: 'emplyoee_tracker'
+  database: 'employee_tracker'
 })
 require('console.table')
 
@@ -17,7 +17,7 @@ const viewAllEmployee = () => {
   LEFT JOIN employee manager on manager.id = employee.manager_id`, (err, employee) => {
     if (err) { console.log(err) }
     console.table(employee)
-    main()
+    mainMenu()
   })
 
 }
@@ -27,10 +27,10 @@ const viewByDepartments = () => {
   SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
   FROM employee LEFT JOIN role ON employee.role_id = role.id
   LEFT JOIN department ON role.department_id = department.id
-  LEFT JOIN employee manager on manager.id = employee.manager_id ORDER BY role.department_id ?`, (err, employee) => {
+  LEFT JOIN employee manager on manager.id = employee.manager_id ORDER BY role.department_id `, (err, employee) => {
     if (err) { console.log(err) }
     console.table(employee)
-    main()
+    mainMenu()
   })
 
 }
@@ -39,10 +39,10 @@ const viewByManager = () => {
   SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
   FROM employee LEFT JOIN role ON employee.role_id = role.id
   LEFT JOIN department ON role.department_id = department.id
-  LEFT JOIN employee manager on manager.id = employee.manager_id ORDERBY employee.manager_id ?`, (err, employee) => {
+  LEFT JOIN employee manager on manager.id = employee.manager_id ORDER BY employee.manager_id`, (err, employee) => {
     if (err) { console.log(err) }
     console.table(employee)
-    main()
+    mainMenu()
   })
 
 }
@@ -136,7 +136,7 @@ const viewByManager = () => {
 //     db.query('INSERT INTO department SET ?', name, err => {
 //       if (err) {console.log(err)}
 //       console.log('New Department Added :' + name)
-//       main()
+//       mainMenu()
 //     })
 //   })
 //   .catch(err => console.log(err))
@@ -186,7 +186,7 @@ const viewByManager = () => {
 //         if (err) { console.log(err) }
 //            console.log(`You have added this role: ${(values[0]).toUpperCase()}.`)
 //            viewRoles()
-//         main()
+//         mainMenu()
         
 //       })
 //     })
@@ -211,7 +211,7 @@ const viewByManager = () => {
 //         db.query('DELETE FROM menu WHERE ?', { id }, err => {
 //           if (err) { console.log(err) }
 //           console.log('Menu Item Deleted!')
-//           main()
+//           mainMenu()
 //         })
 //       })
 //       .catch(err => console.log(err))
@@ -242,14 +242,14 @@ const viewByManager = () => {
 //         db.query('UPDATE menu SET ? WHERE ?', [{ price }, { id }], err => {
 //           if (err) { console.log(err) }
 //           console.log('Menu Item Price Updated!')
-//           main()
+//           mainMenu()
 //         })
 //       })
 //       .catch(err => console.log(err))
 //   })
 // }
 
-const main = () => {
+const mainMenu = () => {
   inquirer.prompt(
     {
     type: 'list',
@@ -287,4 +287,4 @@ const main = () => {
     .catch(err => console.log(err))
 }
 
-main()
+mainMenu()
