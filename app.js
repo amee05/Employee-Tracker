@@ -48,7 +48,7 @@ const viewByManager = () => {
 }
 
 const addEmployee = () => {
-  db.query('SELECT * FROM role', (err, role) => {
+  db.query('SELECT * FROM employee', (err, employee) => {
     if (err) { console.log(err) }
   inquirer.prompt([
     {
