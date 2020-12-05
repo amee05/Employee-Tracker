@@ -48,40 +48,57 @@ const viewByManager = () => {
 }
 
 const addEmployee = () => {
-  db.query('SELECT * FROM employee', (err, employee) => {
+  db.query('SELECT * FROM role', (err, role) => {
     if (err) { console.log(err) }
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'first',
-      message: 'What is the first name of the Employee?'
-    },
-    {
-      type: 'input',
-      name: 'last',
-      message: 'What is the last name of the Employee?'
-    },
-    {
-      type: 'list',
-      name: 'role_id',
-      message: 'Pick the role id for this Employee',
-      choices: role.map(role => ({
-        name: role.name,
-        value: role.id
-      }))
-    },
-    
-  ])
-    .then((role) => {
-      db.query('INSERT INTO employee SET ?', role, err => {
-        if (err) { console.log(err) }
-        console.log('Employee Created!')
-        mainMenu()
-      })
+    db.query(`SELECT * FROM employee`, (err, employee) => {
+      if (err) { console.log(err) }
+      
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'first_name',
+          message: `What is the employee's first name?`
+        },
+        {
+          type: 'input',
+          name: 'last_name',
+          message: `What is the employee's last name?`
+        },
+        {
+          type: 'list',
+          name: 'role_id',
+          message: `What is the employee's role`,
+          choices: role.map(role => ({
+            name: `${role.title}`,
+            value: role.id
+          }))
+        },
+        
+        {
+          type: 'list',
+          name: 'manager_id',
+          message: `Who is the employee's manager`,
+          choices: employee.map(employee => ({
+            name: `${employee.first_name} ${employee.last_name}`,
+            value: employee.id
+          })),
+          
+        }
+      ])
+        .then(data => {
+          
+          db.query('INSERT INTO employee SET ?', data, err => {
+            if (err) { console.log(err) }
+            console.log(` New Employee added ${data.first_name} ${data.last_name} `)
+           
+            mainMenu()
+          })
+        })
     })
-  .catch(err => console.log(err))
-})
+  })
 }
+ 
+
 
 const addDept = () => {
   
@@ -99,6 +116,7 @@ const addDept = () => {
   })
   .catch(err => console.log(err))
 }
+
 
 const addRole = () => {
   db.query('SELECT * FROM department', (err, department) =>{
@@ -196,9 +214,8 @@ const mainMenu = () => {
     type: 'list',
     name: 'action',
     message: 'What would you like to do?',
-      choices: ['View All Employees', 'View All Employees by Department', 'View All Employees by Manager', 'Add Department', 'Add Role', 'Exit']
-    // , 'Add Employee', 
-    //  ]
+      choices: ['View All Employees', 'View All Employees by Department', 'View All Employees by Manager', 'Add Employee', 'Add Department', 'Add Role', 'Exit']
+    
   })
     .then(({ action }) => {
       switch (action) {
@@ -211,9 +228,9 @@ const mainMenu = () => {
         case 'View All Employees by Manager':
           viewByManager()
           break
-        // case 'Add Employee':
-        //   addEmployee()
-        //   break
+        case 'Add Employee':
+          addEmployee()
+          break
         case 'Add Department':
           addDept()
           break
